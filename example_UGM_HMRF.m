@@ -30,9 +30,9 @@ for i = 1:nVisNodes
     adj(i,i+nVisNodes) = 1;
 end
 
-% for i = 1:nVisNodes-1
-%     adj(i, i+1) = 1;
-% end
+for i = 1:nVisNodes-1
+    adj(i, i+1) = 1;
+end
 
 for i = 1:nHidNodes-1
     adj(nVisNodes + i,nVisNodes+i+1) = 1;
@@ -72,44 +72,45 @@ options.TolFun=1e-2;
 options.TolX=1e-2;
 options.Method='lbfgs';
 options.Display='on';
-options.MaxIter=5;
+options.MaxIter=400;
 options.DerivativeCheck='off';
 
 % Optimize
+tic;
 w = minFunc(reglaFunObj,w, options);
+toc;
 
 % Now make potentials
 [nodePot,edgePot] = UGM_MRF_makePotentials(w,nodeMap,edgeMap,edgeStruct);
 
 
-% %% Do decoding and inference
-% 
-% decode = UGM_Decode_Tree(nodePot,edgePot,edgeStruct)
-% 
-% [nodeBel,edgeBel,logZ] = UGM_Infer_Tree(nodePot,edgePot,edgeStruct);
-% nodeBel
-% 
-% samples = UGM_Sample_Tree(nodePot,edgePot,edgeStruct);
-% figure;
-% imagesc(samples')
-% title('Samples from MRF model');
-% fprintf('(paused)\n');
-% 
-% 
-% %% Do conditional decoding/inference/sampling in learned model
-% 
-% clamped = zeros(nNodes,1);
-% clamped(1:2:90) = 2;
-% 
-% condDecode = UGM_Decode_Conditional(nodePot,edgePot,edgeStruct,clamped,@UGM_Decode_Tree);
-% condNodeBel = UGM_Infer_Conditional(nodePot,edgePot,edgeStruct,clamped,@UGM_Infer_Tree);
-% condSamples = UGM_Sample_Conditional(nodePot,edgePot,edgeStruct,clamped,@UGM_Sample_Tree);
-% 
-% figure;
-% imagesc(condSamples')
-% title('Conditional samples from MRF model');
-% fprintf('(paused)\n');
-% 
+%% Do decoding and inference
+
+decode = UGM_Decode_LBP(nodePot,edgePot,edgeStruct);
+
+[nodeBel,edgeBel,logZ] = UGM_Infer_LBP(nodePot,edgePot,edgeStruct);
+
+samples = UGM_Sample_Gibbs(nodePot,edgePot,edgeStruct,1000);
+figure;
+imagesc(samples')
+title('Samples from MRF model');
+fprintf('(paused)\n');
+
+
+%% Do conditional decoding/inference/sampling in learned model
+
+clamped = zeros(nNodes,1);
+clamped(1:2:90) = 2;
+
+condDecode = UGM_Decode_Conditional(nodePot,edgePot,edgeStruct,clamped,@UGM_Decode_LBP);
+condNodeBel = UGM_Infer_Conditional(nodePot,edgePot,edgeStruct,clamped,@UGM_Infer_LBP);
+condSamples = UGM_Sample_Conditional(nodePot,edgePot,edgeStruct,clamped,@UGM_Sample_Gibbs);
+
+figure;
+imagesc(condSamples')
+title('Conditional samples from MRF model');
+fprintf('(paused)\n');
+
 
 
 

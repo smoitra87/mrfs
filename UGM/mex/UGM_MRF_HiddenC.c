@@ -90,7 +90,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                         obs = edgeBelC[s1 + maxState*(Y[i + nInstances*n2]-1 + maxState*e)]; 
                     }
                     else if (s1 == Y[i + nInstances*n1]-1 && Y[i + nInstances*n2]==0) {
-                        obs = edgeBelC[Y[i + nInstances*n1]-1 + maxState*(Y[i + nInstances*n2]-1 + maxState*e)]; 
+                        obs = edgeBelC[Y[i + nInstances*n1]-1 +
+                            maxState*(s2 + maxState*e)]; 
                     }
                     else if (s1 == Y[i + nInstances*n1]-1 && s2 == Y[i + nInstances*n2]-1) {
                         obs = 1; 

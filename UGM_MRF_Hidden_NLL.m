@@ -26,17 +26,15 @@ for i = 1:nInstances
 
     
     
-    [logZC_update, g_update] = update_grad(g, Y,i, nodePot, edgePot, nodeMap, edgeMap, ...
-        nodeBelC, edgeBelC, nodeBel, edgeBel, edgeEnds, nStates);
-
- %   temp.g = g;
-%    [logZC_updateC] = UGM_MRF_HiddenC(g, Y, int32(i), nodePot, edgePot, nodeMap, edgeMap, ...
+%   [logZC_update, g_update] = update_grad(g, Y,i, nodePot, edgePot, nodeMap, edgeMap, ...
 %        nodeBelC, edgeBelC, nodeBel, edgeBel, edgeEnds, nStates);
+%    g  = g + g_update;
+
+   [logZC_update] = UGM_MRF_HiddenC(g, Y, int32(i), nodePot, edgePot, nodeMap, edgeMap, ...
+        nodeBelC, edgeBelC, nodeBel, edgeBel, edgeEnds, nStates);
 
     % Update NLL
     NLL = NLL - logZC - logZC_update + logZ;    
-    g  = g + g_update;
-   
 end
 end
 

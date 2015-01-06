@@ -6,6 +6,11 @@ if nargin < 5
 % Initialize
 [junk y] = max(nodePot,[],2);
 end
+if nargin < 4
+% Initialize
+burnIn = 10;
+end
+
 
 if edgeStruct.useMex
     samples = UGM_Sample_GibbsC(nodePot,edgePot,edgeStruct.edgeEnds,edgeStruct.nStates,edgeStruct.V,edgeStruct.E,int32(edgeStruct.maxIter),int32(burnIn),int32(y));
