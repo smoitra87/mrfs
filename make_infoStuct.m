@@ -11,7 +11,7 @@ options.DerivativeCheck='off';
 infoStruct.options = options;
 
 infoStruct.seed = 42;
-infoStruct.hasHidden = 1;
+infoStruct.hasHidden = 0;
 infoStruct.lambdaNode = 0.1;
 infoStruct.lambdaEdge = 1;
 infoStruct.inferFunc = 'loopy';
@@ -20,11 +20,18 @@ infoStruct.condInferFunc = 'loopy';
 infoStruct.nHidStates = 4;
 
 nVisNodes = 99;
-nHidNodes = 99;
-adj = zeros(nVisNodes + nHidNodes);
-for i = 1:nVisNodes
-    adj(i,i+nVisNodes) = 1;
+if infoStruct.hasHidden 
+    nHidNodes = nVisNodes;
+else
+    nHidNodes = 0;
 end
+
+adj = zeros(nVisNodes + nHidNodes);
+
+
+% for i = 1:nVisNodes
+%     adj(i,i+nVisNodes) = 1;
+% end
 
 for i = 1:nVisNodes-1
     adj(i, i+1) = 1;
