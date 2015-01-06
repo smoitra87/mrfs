@@ -36,6 +36,17 @@ maxState = max(nStates);
 nEdges = edgeStruct.nEdges;
 
 %% Make Node and Edge Pots
+% TODO - fix the node and the edge map to untie the paramms
+
+% % Make nodeMap
+% nodeMap = zeros(nNodes,maxState,'int32');
+% nodeMap(:,1) = 1;
+% 
+% % Make edgeMap
+% edgeMap = zeros(maxState,maxState,nEdges,'int32');
+% 
+% edgeMap(1,1,:) = 2;
+% edgeMap(2,2,:) = 2;
 ising= 0 ; tied = 0;
 [nodeMap,edgeMap] = UGM_makeMRFmaps(nNodes,edgeStruct,ising,tied);
 

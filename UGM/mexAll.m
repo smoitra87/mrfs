@@ -23,3 +23,4 @@ mex -Imex -outdir compiled mex/UGM_LogConfigurationPotentialC.c
 mex -Imex -outdir compiled mex/UGM_Decode_AlphaExpansionC.c
 mex -Imex -outdir compiled mex/UGM_Decode_AlphaExpansionBetaShrinkC.c
 mex -Imex -outdir compiled mex/UGM_CRF_NLLC.c
+mex -Imex -outdir compiled mex/UGM_MRF_HiddenC.c

@@ -4,10 +4,15 @@ function [nodeBel, edgeBel, logZ] = UGM_Infer_Conditional(nodePot,edgePot,edgeSt
 [nNodes,maxState] = size(nodePot);
 nEdges = size(edgePot,3);
 edgeEnds = edgeStruct.edgeEnds;
+nStates = edgeStruct.nStates;
 
 [clampedNP,clampedEP,clampedES,edgeMap] = UGM_makeClampedPotentials(nodePot,edgePot,edgeStruct,clamped);
+nStatesClamped = clampedES.nStates;
+
 
 [clampedNB,clampedEB,logZ] = inferFunc(clampedNP,clampedEP,clampedES);
+
+
 
 % Construct node beliefs
 nodeBel = zeros(size(nodePot));
@@ -19,7 +24,7 @@ for n = 1:nNodes
        nodeBel(n,clamped(clampedSet(clampVar))) = 1;
        clampVar = clampVar+1;
    else
-       nodeBel(n,:) = clampedNB(regulVar,:);
+       nodeBel(n,1:nStates(n)) = clampedNB(regulVar,1:nStatesClamped(regulVar));
        regulVar = regulVar + 1;
    end
 end
@@ -40,14 +45,14 @@ for e = 1:nEdges
            % n1 is a clamped variable, n2 is a regular variable
            clampVar = find(clampedSet==n1);
            regulVar = find(mysetdiff(1:nNodes,clampedSet)==n2);
-           edgeBel(clamped(clampedSet(clampVar)),:,e) = clampedNB(regulVar,:);
+           edgeBel(clamped(clampedSet(clampVar)),1:nStates(n2),e) = clampedNB(regulVar,1:nStatesClamped(regulVar));
        end
    else
        if any(clampedSet==n2)
            % n2 is a clamped variable, n1 is a regular variable
            clampVar = find(clampedSet==n2);
            regulVar = find(mysetdiff(1:nNodes,clampedSet)==n1);
-           edgeBel(:,clamped(clampedSet(clampVar)),e) = clampedNB(regulVar,:)';
+           edgeBel(1:nStates(n1),clamped(clampedSet(clampVar)),e) = clampedNB(regulVar,1:nStatesClamped(regulVar))';
        else
            % This edge was present in the clamped graph
            edgeBel(:,:,e) = clampedEB(:,:,edgeMap(e));
