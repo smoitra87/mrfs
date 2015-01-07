@@ -31,13 +31,13 @@ if __name__ == '__main__':
 
     records = []
     for paramf in paramfs:
-        base_key = os.path.splitext(os.path.basename(paramfs[0]))[0]
+        base_key = os.path.splitext(os.path.basename(paramf))[0]
         base_key = "_".join(base_key.split("_")[:-1])
 
         llf = [f for f in llfs if base_key in f]
         pllf = [f for f in pllfs if base_key in f]
 
-        mat = sio.loadmat(paramfs[0], squeeze_me=True)
+        mat = sio.loadmat(paramf, squeeze_me=True)
         infoStruct = mat['infoStruct']
 
         metric = {}
@@ -55,7 +55,6 @@ if __name__ == '__main__':
 
         record = [metric[h] if h in metric else str(infoStruct[h]) for h in headers]
         records.append(record)
-
 
     import csv
 
