@@ -81,6 +81,10 @@ valid_dict = {'PF00240' :'PF00240_500_valid.msa',
 test_dict = {'PF00240' :'PF00240_500_test.msa',
              'PF00595' : 'PF00595_500_test.msa'}
 
+datamux = {'train' : train_dict,
+          'valid' : valid_dict,
+          'test' : test_dict}
+
 adjf_dict = {
     'PF00240' : '1UBQ_adj.npy',
     'PF00595' : '1BE9_adj.npy'
@@ -133,6 +137,7 @@ if __name__ == '__main__':
     parser.add_argument("--param", action='store_true', help="Learn params flag")
     parser.add_argument("--eval_pll", action='store_true', help="Evaluate Pll")
     parser.add_argument("--eval_ll", action='store_true', help="Evaluate Test ll")
+
     args = parser.parse_args()
 
     if not args.infodir:
@@ -175,28 +180,21 @@ if __name__ == '__main__':
             outstr = "('%s','%s','%s')"%(infof, msaf, outf)
             print >>sys.stdout, outstr
 
-        if args.eval_pll:
+        if args.eval_pll or args.eval_ll:
             paramf =  "{}_{}_params.mat".format(args.prefix, idx)
             paramf = os.path.join(args.rootdir,args.resultsdir, paramf)
 
-            msaf = valid_dict[datakey]
-            msaf = os.path.join(args.rootdir,args.datadir, msaf)
+            for dtype in datamux.keys():
+                data_dict = datamux[dtype]
+                msaf = data_dict[datakey]
+                msaf = os.path.join(args.rootdir,args.datadir, msaf)
 
-            outf =  "{}_{}_pll.mat".format(args.prefix, idx)
-            outf = os.path.join(args.rootdir,args.resultsdir, outf)
+                if args.eval_pll:
+                    outf =  "{}_{}_{}_pll.mat".format(args.prefix, idx, dtype)
+                else:
+                    outf =  "{}_{}_{}_ll.mat".format(args.prefix, idx, dtype)
 
-            outstr = "('%s','%s','%s')"%(paramf, msaf, outf)
-            print >>sys.stdout, outstr
+                outf = os.path.join(args.rootdir,args.resultsdir, outf)
 
-        if args.eval_ll:
-            paramf =  "{}_{}_params.mat".format(args.prefix, idx)
-            paramf = os.path.join(args.rootdir,args.resultsdir, paramf)
-
-            msaf = valid_dict[datakey]
-            msaf = os.path.join(args.rootdir,args.datadir, msaf)
-
-            outf =  "{}_{}_ll.mat".format(args.prefix, idx)
-            outf = os.path.join(args.rootdir,args.resultsdir, outf)
-
-            outstr = "('%s','%s','%s')"%(paramf, msaf, outf)
-            print >>sys.stdout, outstr
+                outstr = "('%s','%s','%s')"%(paramf, msaf, outf)
+                print >>sys.stdout, outstr
