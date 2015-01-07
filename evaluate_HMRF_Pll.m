@@ -70,6 +70,7 @@ pll = mean(pll);
 
 fprintf('Average PLL : %f\n', pll);
 fprintf('Imputation Error : %f\n', impErr);
+save(outf, 'pll', 'impErr');
 end
 
 

@@ -69,6 +69,7 @@ else
 end
 
 fprintf('Average LL : %f', avgLL);
+save(outf, 'avgLL');
 
 end
 

@@ -73,14 +73,18 @@ nHidStates_list = [2., 5., 10.]
 data_list = ['PF00240']
 arch_list = ['linvis-linhid', '3dvis-3dhid', 'linvis-3dhid']
 
-msaf_dict = {'PF00240' :'PF00240_1k_train.msa',
+train_dict = {'PF00240' :'PF00240_1k_train.msa',
              'PF00595' : 'PF00595_1k_train.msa',
              'sim3' : 'sim3.train.msa'}
+valid_dict = {'PF00240' :'PF00240_500_valid.msa',
+             'PF00595' : 'PF00595_500_valid.msa'}
+test_dict = {'PF00240' :'PF00240_500_test.msa',
+             'PF00595' : 'PF00595_500_test.msa'}
+
 adjf_dict = {
     'PF00240' : '1UBQ_adj.npy',
     'PF00595' : '1BE9_adj.npy'
 }
-
 
 data_nVisNodes = {
     'PF00240' : 69,
@@ -126,6 +130,9 @@ if __name__ == '__main__':
     parser.add_argument("--datadir", type=str, help="Directory for datafile")
     parser.add_argument("--rootdir", type=str, help="Directory on workhorse")
     parser.add_argument("--resultsdir", type=str, help="Directory on workhorse")
+    parser.add_argument("--param", action='store_true', help="Learn params flag")
+    parser.add_argument("--eval_pll", action='store_true', help="Evaluate Pll")
+    parser.add_argument("--eval_ll", action='store_true', help="Evaluate Test ll")
     args = parser.parse_args()
 
     if not args.infodir:
@@ -145,22 +152,51 @@ if __name__ == '__main__':
     for idx, tup in enumerate(product(data_list, arch_list, lambda_list, \
                                       nHidStates_list)):
         datakey, archtype, lambdaVal, nHidStates = tup
-        infoStruct = create_infoStruct(archtype, datakey)
-        infoStruct['archtype'] = archtype
-        infoStruct['datakey'] = datakey
-        infoStruct['lambdaNode'] = lambdaVal
-        infoStruct['lambdaEdge'] = lambdaVal
-        infoStruct['nHidStates'] = nHidStates
 
-        infof = "{}_{}_infoStruct.mat".format(args.prefix,idx)
-        sio.savemat(os.path.join(args.infodir,infof), {'infoStruct': infoStruct})
 
-        msaf = msaf_dict[datakey]
-        outf =  "{}_{}_params.mat".format(args.prefix, idx)
+        if args.param:
+            infoStruct = create_infoStruct(archtype, datakey)
+            infoStruct['archtype'] = archtype
+            infoStruct['datakey'] = datakey
+            infoStruct['lambdaNode'] = lambdaVal
+            infoStruct['lambdaEdge'] = lambdaVal
+            infoStruct['nHidStates'] = nHidStates
 
-        infof = os.path.join(args.rootdir,args.infodir, infof)
-        msaf = os.path.join(args.rootdir,args.datadir, msaf)
-        outf = os.path.join(args.rootdir,args.resultsdir, outf)
+            infof = "{}_{}_infoStruct.mat".format(args.prefix,idx)
+            sio.savemat(os.path.join(args.infodir,infof), {'infoStruct': infoStruct})
 
-        outstr = "('%s','%s','%s')"%(infof, msaf, outf)
-        print >>sys.stdout, outstr
+            msaf = train_dict[datakey]
+            outf =  "{}_{}_params.mat".format(args.prefix, idx)
+
+            infof = os.path.join(args.rootdir,args.infodir, infof)
+            msaf = os.path.join(args.rootdir,args.datadir, msaf)
+            outf = os.path.join(args.rootdir,args.resultsdir, outf)
+
+            outstr = "('%s','%s','%s')"%(infof, msaf, outf)
+            print >>sys.stdout, outstr
+
+        if args.eval_pll:
+            paramf =  "{}_{}_params.mat".format(args.prefix, idx)
+            paramf = os.path.join(args.rootdir,args.resultsdir, paramf)
+
+            msaf = valid_dict[datakey]
+            msaf = os.path.join(args.rootdir,args.datadir, msaf)
+
+            outf =  "{}_{}_pll.mat".format(args.prefix, idx)
+            outf = os.path.join(args.rootdir,args.resultsdir, outf)
+
+            outstr = "('%s','%s','%s')"%(paramf, msaf, outf)
+            print >>sys.stdout, outstr
+
+        if args.eval_ll:
+            paramf =  "{}_{}_params.mat".format(args.prefix, idx)
+            paramf = os.path.join(args.rootdir,args.resultsdir, paramf)
+
+            msaf = valid_dict[datakey]
+            msaf = os.path.join(args.rootdir,args.datadir, msaf)
+
+            outf =  "{}_{}_ll.mat".format(args.prefix, idx)
+            outf = os.path.join(args.rootdir,args.resultsdir, outf)
+
+            outstr = "('%s','%s','%s')"%(paramf, msaf, outf)
+            print >>sys.stdout, outstr
