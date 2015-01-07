@@ -73,8 +73,8 @@ nHidStates_list = [2., 5., 10.]
 data_list = ['PF00240']
 arch_list = ['linvis-linhid', '3dvis-3dhid', 'linvis-3dhid']
 
-msaf_dict = {'PF00240' :'PF00240_train.msa',
-             'PF00595' : 'PF00595_train.msa',
+msaf_dict = {'PF00240' :'PF00240_1k_train.msa',
+             'PF00595' : 'PF00595_1k_train.msa',
              'sim3' : 'sim3.train.msa'}
 adjf_dict = {
     'PF00240' : '1UBQ_adj.npy',
@@ -119,11 +119,23 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser(description="Create param jobs")
     parser.add_argument("--prefix", type=str, default="hmrf")
-    parser.add_argument("--infofdir", type=str, help="Directory for infoStruct")
+    parser.add_argument("--infodir", type=str, help="Directory for infoStruct")
+    parser.add_argument("--datadir", type=str, help="Directory for datafile")
+    parser.add_argument("--rootdir", type=str, help="Directory on workhorse")
+    parser.add_argument("--resultsdir", type=str, help="Directory on workhorse")
     args = parser.parse_args()
 
-    if not args.infofdir:
-        raise ValueError('infofdir missing')
+    if not args.infodir:
+        raise ValueError('infodir missing')
+
+    if not args.rootdir:
+        raise ValueError('rootdir missing')
+
+    if not args.datadir:
+        raise ValueError('datadir missing')
+
+    if not args.resultsdir:
+        raise ValueError('resultsdir missing')
 
     from itertools import product
 
@@ -138,10 +150,14 @@ if __name__ == '__main__':
         infoStruct['nHidStates'] = nHidStates
 
         infof = "{}_{}_infoStruct.mat".format(args.prefix,idx)
-        sio.savemat(os.path.join(args.infofdir,infof), {'infoStruct': infoStruct})
+        sio.savemat(os.path.join(args.infodir,infof), {'infoStruct': infoStruct})
 
         msaf = msaf_dict[datakey]
         outf =  "{}_{}_params.mat".format(args.prefix, idx)
+
+        infof = os.path.join(args.rootdir,args.infodir, infof)
+        msaf = os.path.join(args.rootdir,args.datadir, msaf)
+        outf = os.path.join(args.rootdir,args.resultsdir, outf)
 
         outstr = "('%s','%s','%s')"%(infof, msaf, outf)
         print >>sys.stdout, outstr
