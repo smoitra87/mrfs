@@ -22,7 +22,6 @@ def plot_matrix(adj):
     raw_input('Continue?')
     plt.close()
 
-
 def create_adj_matrix(nVisNodes, nHidNodes, options):
     nNodes = nVisNodes + nHidNodes;
     adj = np.zeros((nNodes, nNodes))
@@ -44,12 +43,7 @@ def create_adj_matrix(nVisNodes, nHidNodes, options):
     #plot_matrix(adj)
     return adj
 
-
-if __name__ == '__main__':
-    from argparse import ArgumentParser
-    parser = ArgumentParser(description="Create Regression jobs")
-    args = parser.parse_args()
-
+def default_infoStruct():
     # Create the infoStruct
     infoStruct = {}
     infoStruct['useMex'] = 1.
@@ -61,15 +55,6 @@ if __name__ == '__main__':
     infoStruct['condInferFunc'] = 'loopy';
     infoStruct['nHidStates'] = 4.;
 
-    # Create the adj matrix
-    #adj_options = ['linear_vis','linear_hid','vis_hid']
-    adj_options = ['linear_vis']
-    nVisNodes = 99
-    nHidNodes = nVisNodes if infoStruct['hasHidden'] else 0
-    adj = create_adj_matrix(nVisNodes,nHidNodes,adj_options)
-    infoStruct['adj'] = adj
-
-
     # Create the options
     options = {}
     options['LS'] = 0.
@@ -80,11 +65,83 @@ if __name__ == '__main__':
     options['MaxIter'] = 400.;
     options['DerivativeCheck'] = 'off';
     infoStruct['options'] = options;
+    return infoStruct
 
-    sio.savemat('infoStruct.mat', {'infoStruct': infoStruct})
+lambda_list = [ 1e-2, 1e-1, 1.]
+nHidStates_list = [2., 5., 10.]
+#data_list = ['PF00240', 'PF00595', 'sim3']
+data_list = ['PF00240']
+arch_list = ['linvis-linhid', '3dvis-3dhid', 'linvis-3dhid']
 
-#    for drug,top in product(DRUGS,toplist):
-#        #outstr = "('%s','%s',1,1,'%s')"%(structf,msaf,instancef)
-#        outstr = 0
-#
-#        print >>sys.stdout, outstr
+msaf_dict = {'PF00240' :'PF00240_train.msa',
+             'PF00595' : 'PF00595_train.msa',
+             'sim3' : 'sim3.train.msa'}
+adjf_dict = {
+    'PF00240' : '1UBQ_adj.npy',
+    'PF00595' : '1BE9_adj.npy'
+}
+
+
+data_nVisNodes = {
+    'PF00240' : 69,
+    'PF00595' : 81
+}
+
+def create_infoStruct(archtype, datakey):
+    infoStruct = default_infoStruct()
+    if archtype == 'linvis-linhid':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = nVisNodes
+        adj = create_adj_matrix(nVisNodes,nHidNodes,['linear_vis', \
+                'linear_hid', 'vis_hid'])
+    elif archtype == 'linvis-3dhid':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = nVisNodes
+        adj = create_adj_matrix(nVisNodes,nHidNodes,['linear_vis', 'vis_hid'])
+        adj_3d = np.load(adjf_dict[datakey])
+        adj[nVisNodes:nVisNodes+nHidNodes,nVisNodes:nVisNodes+nHidNodes] = \
+                adj_3d;
+    elif archtype == '3dvis-3dhid':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = nVisNodes
+        adj = create_adj_matrix(nVisNodes,nHidNodes,['vis_hid'])
+        adj_3d = np.load(adjf_dict[datakey])
+        adj[:nVisNodes,:nVisNodes] = adj_3d;
+        adj[nVisNodes:nVisNodes+nHidNodes,nVisNodes:nVisNodes+nHidNodes] = \
+                adj_3d;
+    else:
+        raise ValueError('Unknown arch', archtype)
+
+    infoStruct['adj'] = adj
+    return infoStruct
+
+if __name__ == '__main__':
+    from argparse import ArgumentParser
+    parser = ArgumentParser(description="Create param jobs")
+    parser.add_argument("--prefix", type=str, default="hmrf")
+    parser.add_argument("--infofdir", type=str, help="Directory for infoStruct")
+    args = parser.parse_args()
+
+    if not args.infofdir:
+        raise ValueError('infofdir missing')
+
+    from itertools import product
+
+    for idx, tup in enumerate(product(data_list, arch_list, lambda_list, \
+                                      nHidStates_list)):
+        datakey, archtype, lambdaVal, nHidStates = tup
+        infoStruct = create_infoStruct(archtype, datakey)
+        infoStruct['archtype'] = archtype
+        infoStruct['datakey'] = datakey
+        infoStruct['lambdaNode'] = lambdaVal
+        infoStruct['lambdaEdge'] = lambdaVal
+        infoStruct['nHidStates'] = nHidStates
+
+        infof = "{}_{}_infoStruct.mat".format(args.prefix,idx)
+        sio.savemat(os.path.join(args.infofdir,infof), {'infoStruct': infoStruct})
+
+        msaf = msaf_dict[datakey]
+        outf =  "{}_{}_params.mat".format(args.prefix, idx)
+
+        outstr = "('%s','%s','%s')"%(infof, msaf, outf)
+        print >>sys.stdout, outstr
