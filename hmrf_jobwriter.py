@@ -92,11 +92,13 @@ def create_infoStruct(archtype, datakey):
     if archtype == 'linvis-linhid':
         nVisNodes = data_nVisNodes[datakey]
         nHidNodes = nVisNodes
+        infoStruct['hasHidden'] = 1.
         adj = create_adj_matrix(nVisNodes,nHidNodes,['linear_vis', \
                 'linear_hid', 'vis_hid'])
     elif archtype == 'linvis-3dhid':
         nVisNodes = data_nVisNodes[datakey]
         nHidNodes = nVisNodes
+        infoStruct['hasHidden'] = 1.
         adj = create_adj_matrix(nVisNodes,nHidNodes,['linear_vis', 'vis_hid'])
         adj_3d = np.load(adjf_dict[datakey])
         adj[nVisNodes:nVisNodes+nHidNodes,nVisNodes:nVisNodes+nHidNodes] = \
@@ -104,6 +106,7 @@ def create_infoStruct(archtype, datakey):
     elif archtype == '3dvis-3dhid':
         nVisNodes = data_nVisNodes[datakey]
         nHidNodes = nVisNodes
+        infoStruct['hasHidden'] = 1.
         adj = create_adj_matrix(nVisNodes,nHidNodes,['vis_hid'])
         adj_3d = np.load(adjf_dict[datakey])
         adj[:nVisNodes,:nVisNodes] = adj_3d;
