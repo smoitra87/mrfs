@@ -30,6 +30,14 @@ def create_adj_matrix(nVisNodes, nHidNodes, options):
         for idx in range(nVisNodes-1):
             adj[idx,idx+1] = 1
 
+    if '2-vis' in options:
+        for idx in range(nVisNodes-2):
+            adj[idx,idx+2] = 1
+
+    if '3-vis' in options:
+        for idx in range(nVisNodes-3):
+            adj[idx,idx+3] = 1
+
     if 'linear_hid' in options:
         for idx in range(nVisNodes, nVisNodes + nHidNodes-1):
             adj[idx,idx+1] = 1
@@ -67,19 +75,20 @@ def default_infoStruct():
     infoStruct['options'] = options;
     return infoStruct
 
-lambda_list = [ 1e-2, 1e-1, 1.]
-nHidStates_list = [2., 5., 10.]
+lambda_list = [ 1.]
+nHidStates_list = [2.]
 #data_list = ['PF00240', 'PF00595', 'sim3']
-data_list = ['PF00240']
-arch_list = ['linvis-linhid', '3dvis-3dhid', 'linvis-3dhid']
+data_list = ['PF00240', 'PF00595']
+arch_list = ['linvis', '3dvis', 'l1vis', '12vis', '123vis', 'linhid', \
+             '3dhid', 'l1hid', 'linvis-linhid', 'linvis-3dhid','l1vis-l1hid' ]
 
-train_dict = {'PF00240' :'PF00240_1k_train.msa',
-             'PF00595' : 'PF00595_1k_train.msa',
+train_dict = {'PF00240' :'PF00240_train.msa',
+             'PF00595' : 'PF00595_train.msa',
              'sim3' : 'sim3.train.msa'}
-valid_dict = {'PF00240' :'PF00240_500_valid.msa',
-             'PF00595' : 'PF00595_500_valid.msa'}
-test_dict = {'PF00240' :'PF00240_500_test.msa',
-             'PF00595' : 'PF00595_500_test.msa'}
+valid_dict = {'PF00240' :'PF00240_valid.msa',
+             'PF00595' : 'PF00595_valid.msa'}
+test_dict = {'PF00240' :'PF00240_test.msa',
+             'PF00595' : 'PF00595_test.msa'}
 
 datamux = {'train' : train_dict,
           'valid' : valid_dict,
@@ -90,14 +99,94 @@ adjf_dict = {
     'PF00595' : '1BE9_adj.npy'
 }
 
+l1_adjf_dict = {
+    'PF00240' : 'results/l1/PF00240.list',
+    'PF00595' : 'results/l1/PF00595.list'
+}
+
 data_nVisNodes = {
     'PF00240' : 69,
     'PF00595' : 81
 }
 
+def load_l1(datakey) :
+    listf = l1_adjf_dict[datakey]
+    with open(listf) as fin:
+        edges = [map(int,line.strip().split(',')) for line in fin]
+
+    nRes = data_nVisNodes[datakey]
+    adj = np.zeros((nRes, nRes))
+    for edge in edges:
+        node1, node2 = edge
+        adj[node1, node2] = 1
+
+    adj += adj.T
+    return adj
+
 def create_infoStruct(archtype, datakey):
     infoStruct = default_infoStruct()
-    if archtype == 'linvis-linhid':
+
+    if archtype == 'linvis':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = 0.
+        infoStruct['hasHidden'] = 0.
+        adj = create_adj_matrix(nVisNodes,nHidNodes,['linear_vis'])
+    elif archtype == '12vis':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = 0.
+        infoStruct['hasHidden'] = 0.
+        adj = create_adj_matrix(nVisNodes,nHidNodes,['linear_vis', '2-vis'])
+    elif archtype == '123vis':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = 0.
+        infoStruct['hasHidden'] = 0.
+        adj = create_adj_matrix(nVisNodes,nHidNodes,['linear_vis', '2-vis',\
+                                                     '3-vis'])
+    elif archtype == '3dvis':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = 0.
+        infoStruct['hasHidden'] = 0.
+        adj = create_adj_matrix(nVisNodes,nHidNodes,[])
+        adj_3d = np.load(adjf_dict[datakey])
+        adj[:nVisNodes,:nVisNodes] = adj_3d;
+    elif archtype == 'l1vis':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = 0.
+        infoStruct['hasHidden'] = 0.
+        adj = create_adj_matrix(nVisNodes,nHidNodes,[])
+        adj_l1 = load_l1(datakey)
+        adj[:nVisNodes,:nVisNodes] = adj_l1;
+    elif archtype == 'linhid':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = nVisNodes
+        infoStruct['hasHidden'] = 1.
+        adj = create_adj_matrix(nVisNodes,nHidNodes,['linear_hid', 'vis_hid'])
+    elif archtype == '3dhid':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = nVisNodes
+        infoStruct['hasHidden'] = 1.
+        adj = create_adj_matrix(nVisNodes,nHidNodes,['vis_hid'])
+        adj_3d = np.load(adjf_dict[datakey])
+        adj[nVisNodes:nVisNodes+nHidNodes,nVisNodes:nVisNodes+nHidNodes] = \
+                adj_3d;
+    elif archtype == 'l1hid':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = nVisNodes
+        infoStruct['hasHidden'] = 1.
+        adj = create_adj_matrix(nVisNodes,nHidNodes,['vis_hid'])
+        adj_l1 = load_l1(datakey)
+        adj[nVisNodes:nVisNodes+nHidNodes,nVisNodes:nVisNodes+nHidNodes] = \
+                adj_l1;
+    elif archtype == 'l1vis-l1hid':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = nVisNodes
+        infoStruct['hasHidden'] = 1.
+        adj = create_adj_matrix(nVisNodes,nHidNodes,['vis_hid'])
+        adj_l1 = load_l1(datakey)
+        adj[:nVisNodes,:nVisNodes] = adj_l1;
+        adj[nVisNodes:nVisNodes+nHidNodes,nVisNodes:nVisNodes+nHidNodes] = \
+                adj_l1;
+    elif archtype == 'linvis-linhid':
         nVisNodes = data_nVisNodes[datakey]
         nHidNodes = nVisNodes
         infoStruct['hasHidden'] = 1.
@@ -111,6 +200,14 @@ def create_infoStruct(archtype, datakey):
         adj_3d = np.load(adjf_dict[datakey])
         adj[nVisNodes:nVisNodes+nHidNodes,nVisNodes:nVisNodes+nHidNodes] = \
                 adj_3d;
+    elif archtype == 'linvis-3dhid':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = nVisNodes
+        infoStruct['hasHidden'] = 1.
+        adj = create_adj_matrix(nVisNodes,nHidNodes,['linear_vis', 'vis_hid'])
+        adj_l1 = load_l1(datakey)
+        adj[nVisNodes:nVisNodes+nHidNodes,nVisNodes:nVisNodes+nHidNodes] = \
+                adj_l1;
     elif archtype == '3dvis-3dhid':
         nVisNodes = data_nVisNodes[datakey]
         nHidNodes = nVisNodes
@@ -157,7 +254,6 @@ if __name__ == '__main__':
     for idx, tup in enumerate(product(data_list, arch_list, lambda_list, \
                                       nHidStates_list)):
         datakey, archtype, lambdaVal, nHidStates = tup
-
 
         if args.param:
             infoStruct = create_infoStruct(archtype, datakey)
