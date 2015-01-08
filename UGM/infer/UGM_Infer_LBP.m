@@ -1,7 +1,7 @@
 function [nodeBel, edgeBel, logZ] = UGM_Infer_LBP(nodePot,edgePot,edgeStruct)
 
 if edgeStruct.useMex
-    [nodeBel,edgeBel,logZ] = UGM_Infer_LBPC(nodePot,edgePot,int32(edgeStruct.edgeEnds),int32(edgeStruct.nStates),int32(edgeStruct.V),int32(edgeStruct.E),edgeStruct.maxIter);
+    [nodeBel,edgeBel,logZ] = UGM_Infer_LBPC(nodePot,edgePot,int32(edgeStruct.edgeEnds),int32(edgeStruct.nStates),int32(edgeStruct.V),int32(edgeStruct.E),int32(edgeStruct.maxIter));
 else
     [nodeBel, edgeBel, logZ] = Infer_LBP(nodePot,edgePot,edgeStruct);
 end

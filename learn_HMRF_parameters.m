@@ -104,6 +104,11 @@ else
 end
 edgeStruct = UGM_makeEdgeStruct(adj,nStates);
 
+if isfield(infoStruct, 'lbpMaxIter')
+    edgeStruct.maxIter = infoStruct.lbpMaxIter;
+end
+
+
 %% Make Node and Edge Maps
 
 [nodeMap,edgeMap] = UGM_make_myMRFmaps(edgeStruct);

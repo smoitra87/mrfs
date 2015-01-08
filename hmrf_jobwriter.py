@@ -70,13 +70,14 @@ def default_infoStruct():
     options['TolX'] =1e-2;
     options['Method'] ='lbfgs';
     options['Display'] = 'on';
-    options['MaxIter'] = 400.;
+    options['MaxIter'] = 1000.;
     options['DerivativeCheck'] = 'off';
     infoStruct['options'] = options;
     return infoStruct
 
-lambda_list = [ 1.]
-nHidStates_list = [2.]
+lambda_list = [ 1., 0.1]
+nHidStates_list = [2.,4.]
+maxIter_list = [1000.]
 #data_list = ['PF00240', 'PF00595', 'sim3']
 data_list = ['PF00240', 'PF00595']
 arch_list = ['linvis', '3dvis', 'l1vis', '12vis', '123vis', 'linhid', \
@@ -252,16 +253,17 @@ if __name__ == '__main__':
     from itertools import product
 
     for idx, tup in enumerate(product(data_list, arch_list, lambda_list, \
-                                      nHidStates_list)):
-        datakey, archtype, lambdaVal, nHidStates = tup
+                                      nHidStates_list, maxIter_list)):
+        datakey, archtype, lambdaVal, nHidStates, lbpMaxIter = tup
 
         if args.param:
             infoStruct = create_infoStruct(archtype, datakey)
             infoStruct['archtype'] = archtype
             infoStruct['datakey'] = datakey
-            infoStruct['lambdaNode'] = lambdaVal
-            infoStruct['lambdaEdge'] = lambdaVal
+            infoStruct['lambdaNode'] *= lambdaVal
+            infoStruct['lambdaEdge'] *= lambdaVal
             infoStruct['nHidStates'] = nHidStates
+            infoStruct['lbpMaxIter'] = lbpMaxIter
 
             infof = "{}_{}_infoStruct.mat".format(args.prefix,idx)
             sio.savemat(os.path.join(args.infodir,infof), {'infoStruct': infoStruct})
