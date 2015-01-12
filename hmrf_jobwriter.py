@@ -311,10 +311,7 @@ if __name__ == '__main__':
                 msaf = data_dict[datakey]
                 msaf = os.path.join(args.rootdir,args.datadir, msaf)
 
-                if args.eval_pll:
-                    outf =  "{}_{}_{}_pll.mat".format(args.prefix, idx, dtype)
-                else:
-                    outf =  "{}_{}_{}_ll.mat".format(args.prefix, idx, dtype)
+                outf =  "{}_{}_{}_reps.mat".format(args.prefix, idx, dtype)
 
                 outf = os.path.join(args.rootdir,args.resultsdir, outf)
 
