@@ -63,8 +63,10 @@ if hasHidden
     end
     avgLL = mean(logZv - logZ);
 else
-    nll = UGM_MRF_Hidden_NLL(w,y,nodeMap,edgeMap,edgeStruct,...
-        condInferFunc, inferFunc);
+    suffStat = UGM_MRF_computeSuffStat(y,nodeMap,edgeMap,edgeStruct);
+    nll = UGM_MRF_NLL(w,nInstances,suffStat,nodeMap,edgeMap,edgeStruct,inferFunc);
+    %nll = UGM_MRF_Hidden_NLL(w,y,nodeMap,edgeMap,edgeStruct,...
+    %    condInferFunc, inferFunc);
     avgLL = -nll / nInstances;    
 end
 

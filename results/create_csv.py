@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
     remove_headers = ['hasHidden', 'seed', 'options', 'adj', 'useMex']
     headers = sorted([h for h in headers if h not in remove_headers])
-    headers = ['train-ll','valid-ll', 'test-ll'] + \
+    headers = ['jobkey', 'train-ll','valid-ll', 'test-ll'] + \
             ['train-pll', 'valid-pll', 'test-pll'] + \
             ['train-imperr', 'valid-imperr', 'test-imperr'] + \
             headers;
@@ -41,6 +41,7 @@ if __name__ == '__main__':
         infoStruct = mat['infoStruct']
 
         metric = {}
+        metric['jobkey'] = base_key
         for f in llf :
             for t in ('train', 'valid', 'test'):
                 if t in f:

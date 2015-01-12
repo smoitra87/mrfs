@@ -55,7 +55,7 @@ end
 err = 0;
 pll = zeros(nInstances, 1);
 for i = 1:nInstances
-    for j = i:nVisNodes
+    for j = 1:nVisNodes
         clamped = y(i,:); clamped(j) = 0;
         [nodeBelC,edgeBelC,logZC] = UGM_Infer_Conditional(nodePot,edgePot,...
             edgeStruct,clamped,condInferFunc);
@@ -63,6 +63,10 @@ for i = 1:nInstances
         err = err + (maxMargIdx ~= y(i,j));
         pll(i) = pll(i) + log(nodeBelC(j,y(i,j)));
     end
+    if i == 500
+        disp('stop');
+    end
+    
 end
 impErr = err/(nInstances*nVisNodes);
 pll = mean(pll);
