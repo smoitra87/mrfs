@@ -1,0 +1,36 @@
+#!/bin/sh
+#PBS -e $HOME/JobIO/err -o $HOME/JobIO/out
+#PBS -N try1_pll
+#PBS -l nodes=1:ppn=1 
+#PBS -l mem=4096m
+##PBS -l walltime=06:00:00
+##PBS -q default
+
+PBS_O_WORKDIR="/home/subhodee/mrfs/jobs"
+BASEDIR="/home/subhodee/mrfs"
+
+#TODO: Remove
+#PBS_ARRAYID=1
+#JOBLIST="/home/subhodee/mrfs/jobs/try1.joblist"
+
+cd $PBS_O_WORKDIR
+
+#---------------------------------------------
+# Unpack the joblist
+args=$(sed -n "${PBS_ARRAYID}p" < $JOBLIST)
+
+
+echo "BASEDIR=${BASEDIR}"
+echo "Args are : $args"
+
+DIRNAME=${BASEDIR}
+
+echo "------------------------------------------"
+
+MATLABEXE="/opt/matlab/7.13/bin/matlab"
+MATLABEXE="${MATLABEXE} -nodesktop -nosplash -nojvm -r "
+
+echo ${MATLABEXE} " addpath(genpath('${DIRNAME}')); extract_mrf_representations$args ; exit "
+${MATLABEXE} " addpath(genpath('${DIRNAME}')); extract_mrf_representations$args ; exit "
+
+

@@ -235,6 +235,7 @@ if __name__ == '__main__':
     parser.add_argument("--param", action='store_true', help="Learn params flag")
     parser.add_argument("--eval_pll", action='store_true', help="Evaluate Pll")
     parser.add_argument("--eval_ll", action='store_true', help="Evaluate Test ll")
+    parser.add_argument("--extract_rep", action='store_true', help="Extract representations")
 
     args = parser.parse_args()
 
@@ -279,6 +280,29 @@ if __name__ == '__main__':
             print >>sys.stdout, outstr
 
         if args.eval_pll or args.eval_ll:
+            paramf =  "{}_{}_params.mat".format(args.prefix, idx)
+            paramf = os.path.join(args.rootdir,args.resultsdir, paramf)
+
+            for dtype in datamux.keys():
+                data_dict = datamux[dtype]
+                msaf = data_dict[datakey]
+                msaf = os.path.join(args.rootdir,args.datadir, msaf)
+
+                if args.eval_pll:
+                    outf =  "{}_{}_{}_pll.mat".format(args.prefix, idx, dtype)
+                else:
+                    outf =  "{}_{}_{}_ll.mat".format(args.prefix, idx, dtype)
+
+                outf = os.path.join(args.rootdir,args.resultsdir, outf)
+
+                outstr = "('%s','%s','%s')"%(paramf, msaf, outf)
+                print >>sys.stdout, outstr
+
+        if args.extract_rep:
+            infoStruct = create_infoStruct(archtype, datakey)
+            if not infoStruct['hasHidden'] :
+                continue
+
             paramf =  "{}_{}_params.mat".format(args.prefix, idx)
             paramf = os.path.join(args.rootdir,args.resultsdir, paramf)
 
