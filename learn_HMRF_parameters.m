@@ -5,11 +5,6 @@ load(infof, 'infoStruct');
 
 %% Global params
 
-if isfield(infoStruct, 'useMex')
-   edgeStruct.useMex = infoStruct.useMex;
-else
-   edgeStruct.useMex = 1;
-end
 
 if isfield(infoStruct, 'options')
    options = infoStruct.options;
@@ -108,7 +103,17 @@ if isfield(infoStruct, 'lbpMaxIter')
     edgeStruct.maxIter = infoStruct.lbpMaxIter;
 end
 
+if isfield(infoStruct, 'useMex')
+   edgeStruct.useMex = infoStruct.useMex;
+else
+   edgeStruct.useMex = 1;
+end
 
+if isfield(infoStruct, 'usePseudo')
+   pseudo = infoStruct.usePseudo;
+else
+   pseudo = 0;
+end
 %% Make Node and Edge Maps
 
 [nodeMap,edgeMap] = UGM_make_myMRFmaps(edgeStruct);
@@ -130,6 +135,10 @@ if hasHidden
         condInferFunc, inferFunc);
     reglaFunObj = @(w)penalizedL2(w,@UGM_MRF_Hidden_NLL,lambda,y,nodeMap,...
         edgeMap,edgeStruct,condInferFunc, inferFunc);
+elseif pseudo > 0
+    nll = UGM_MRF_PseudoNLL(w,y,nodeMap,edgeMap,edgeStruct);
+    reglaFunObj = @(w)penalizedL2(w,@UGM_MRF_PseudoNLL,lambda,y,nodeMap,...
+            edgeMap,edgeStruct);
 else
     % Compute sufficient statistics
     suffStat = UGM_MRF_computeSuffStat(y,nodeMap,edgeMap,edgeStruct);
