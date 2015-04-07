@@ -15,11 +15,6 @@ g = zeros(size(w));
 
 for i = 1:nInstances
     % Make potentials
-    if edgeStruct.useMex
-        % Updates in-place
-        UGM_MRF_PseudoNLLC(NLL,g,int32(i),nodePot,edgePot,edgeEnds,V,E,nStates,nodeMap,edgeMap,Y);
-    else
-        
         for n = 1:nNodes
             % Find Neighbors
             edges = E(V(n):V(n+1)-1);
@@ -89,5 +84,4 @@ for i = 1:nInstances
                 end
             end
         end
-    end
 end
