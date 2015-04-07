@@ -167,8 +167,7 @@ def create_infoStruct(archtype, datakey):
         nVisNodes = data_nVisNodes[datakey]
         nHidNodes = 0.
         infoStruct['hasHidden'] = 0.
-        adj = create_adj_matrix(nVisNodes,nHidNodes,[])
-        adj2 = create_adj_matrix(nVisNodes,nHidNodes,['linear_vis', '2-vis','3-vis'])
+        adj = create_adj_matrix(nVisNodes,nHidNodes,['linear_vis', '2-vis','3-vis'])
         adj_l1 = load_l1(datakey)
         adj[:nVisNodes,:nVisNodes] += adj_l1;
     elif archtype == 'linhid':
