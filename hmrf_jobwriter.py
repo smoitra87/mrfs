@@ -170,6 +170,7 @@ def create_infoStruct(archtype, datakey):
         adj = create_adj_matrix(nVisNodes,nHidNodes,['linear_vis', '2-vis','3-vis'])
         adj_l1 = load_l1(datakey)
         adj[:nVisNodes,:nVisNodes] += adj_l1;
+        adj[adj>0] = 1.;
     elif archtype == 'linhid':
         nVisNodes = data_nVisNodes[datakey]
         nHidNodes = nVisNodes
