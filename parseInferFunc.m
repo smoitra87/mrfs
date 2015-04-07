@@ -7,7 +7,7 @@ function f =  parseInferFunc(k)
         case 'tree'
             f = @UGM_Infer_Tree;
         case 'mf'
-            f = @UGM_Infer_MeanField
+            f = @UGM_Infer_MeanField;
         otherwise
               error('learn_parameters:parseInferFunc', ...
                   strcat('Unknown infer function :', k));
