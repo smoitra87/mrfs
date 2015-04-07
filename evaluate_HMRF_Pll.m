@@ -7,16 +7,16 @@ load(paramf, 'adj', 'edgeMap', 'edgePot', 'edgeStruct', 'infoStruct', ...
 
 [names,y] = textread(msaf, '%s %s');
 if(isempty(y{1}))
-  y = textread(msaf, '%s');
+    y = textread(msaf, '%s');
 end;
 y = converttonumericmsa(y);
 y = y-min(min(y));
 [nInstances,nVisNodes] = size(y);
 
 if isfield(infoStruct, 'hasHidden')
-   hasHidden = infoStruct.hasHidden;
+    hasHidden = infoStruct.hasHidden;
 else
-   hasHidden = 0;
+    hasHidden = 0;
 end
 
 if hasHidden
@@ -33,40 +33,47 @@ y = int32(y);
 %% Load inference related data
 
 if isfield(infoStruct, 'inferFunc')
-   inferFunc = parseInferFunc(infoStruct.inferFunc);
+    inferFunc = parseInferFunc(infoStruct.inferFunc);
 else
-   inferFunc = @UGM_Infer_LBP;
+    inferFunc = @UGM_Infer_LBP;
 end
 
 
 if isfield(infoStruct, 'condInferFunc')
-   condInferFunc = parseInferFunc(infoStruct.condInferFunc);
+    condInferFunc = parseInferFunc(infoStruct.condInferFunc);
 else
-   condInferFunc = @UGM_Infer_LBP;
+    condInferFunc = @UGM_Infer_LBP;
 end
 
+if isfield(infoStruct, 'usePseudo')
+    pseudo = infoStruct.usePseudo;
+else
+    pseudo = 0;
+end
 
-%% Calculate Log likelihood
-
-
-[nodeBel,edgeBel,logZ] = inferFunc(nodePot,edgePot,edgeStruct);
 
 %% Do conditional inference
 err = 0;
 pll = zeros(nInstances, 1);
 for i = 1:nInstances
-    for j = 1:nVisNodes
-        clamped = y(i,:); clamped(j) = 0;
-        [nodeBelC,edgeBelC,logZC] = UGM_Infer_Conditional(nodePot,edgePot,...
-            edgeStruct,clamped,condInferFunc);
-        [maxMarg,maxMargIdx] = max(nodeBelC(j,:));
-        err = err + (maxMargIdx ~= y(i,j));
-        pll(i) = pll(i) + log(nodeBelC(j,y(i,j)));
-    end
-    if i == 500
-        disp('stop');
-    end
     
+    if pseudo > 0
+        nodeBel = UGM_MRF_InferPseudo(y(i,:), nodePot,edgePot, edgeStruct);
+        for j = 1:nVisNodes
+            [maxMarg,maxMargIdx] = max(nodeBel(j,:));
+            err = err + (maxMargIdx ~= y(i,j));
+            pll(i) = pll(i) + log(nodeBel(j,y(i,j)));
+        end
+    else
+        for j = 1:nVisNodes
+            clamped = y(i,:); clamped(j) = 0;
+            [nodeBelC,edgeBelC,logZC] = UGM_Infer_Conditional(nodePot,edgePot,...
+                edgeStruct,clamped,condInferFunc);
+            [maxMarg,maxMargIdx] = max(nodeBelC(j,:));
+            err = err + (maxMargIdx ~= y(i,j));
+            pll(i) = pll(i) + log(nodeBelC(j,y(i,j)));
+        end
+    end
 end
 impErr = err/(nInstances*nVisNodes);
 pll = mean(pll);
