@@ -59,8 +59,8 @@ def default_infoStruct():
     infoStruct['hasHidden'] = 0.;
     infoStruct['lambdaNode'] = 0.1;
     infoStruct['lambdaEdge'] = 1.
-    infoStruct['inferFunc'] = 'loopy';
-    infoStruct['condInferFunc'] = 'loopy';
+    infoStruct['inferFunc'] = 'mf';
+    infoStruct['condInferFunc'] = 'mf';
     infoStruct['nHidStates'] = 4.;
     infoStruct['usePseudo'] = 0;
 
