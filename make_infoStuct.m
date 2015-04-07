@@ -1,5 +1,5 @@
 clear all;
-infoStruct.useMex = 0;
+infoStruct.useMex = 1;
 
 options.LS=0;
 options.TolFun=1e-2;
@@ -14,8 +14,8 @@ infoStruct.seed = 42;
 infoStruct.hasHidden = 0;
 infoStruct.lambdaNode = 0.1;
 infoStruct.lambdaEdge = 1;
-infoStruct.inferFunc = 'loopy';
-infoStruct.condInferFunc = 'loopy';
+infoStruct.inferFunc = 'mf';
+infoStruct.condInferFunc = 'mf';
 infoStruct.usePseudo = 1;
 
 infoStruct.nHidStates = 4;
