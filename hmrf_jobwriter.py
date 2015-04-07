@@ -62,7 +62,7 @@ def default_infoStruct():
     infoStruct['inferFunc'] = 'mf';
     infoStruct['condInferFunc'] = 'mf';
     infoStruct['nHidStates'] = 4.;
-    infoStruct['usePseudo'] = 0;
+    infoStruct['usePseudo'] = 1;
 
     # Create the options
     options = {}
