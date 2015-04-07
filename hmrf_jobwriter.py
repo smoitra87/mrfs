@@ -54,7 +54,7 @@ def create_adj_matrix(nVisNodes, nHidNodes, options):
 def default_infoStruct():
     # Create the infoStruct
     infoStruct = {}
-    infoStruct['useMex'] = 0.
+    infoStruct['useMex'] = 1.
     infoStruct['seed'] = 42;
     infoStruct['hasHidden'] = 0.;
     infoStruct['lambdaNode'] = 0.1;
