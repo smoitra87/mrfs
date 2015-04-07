@@ -86,7 +86,8 @@ data_list = ['PF00240', 'PF00595']
 #arch_list = ['linvis', '3dvis', 'l1vis', '12vis', '123vis', 'linhid', \
 #             '3dhid', 'l1hid', 'linvis-linhid', 'linvis-3dhid','l1vis-l1hid' ]
 #arch_list = ['3dvis', 'l1vis', '12vis' ]
-arch_list = ['l1hid', 'linvis-linhid', '3dhid','12vis' ]
+arch_list = ['l1123vis' ]
+#arch_list = ['l1hid', 'linvis-linhid', '3dhid','12vis' ]
 
 train_dict = {'PF00240' :'PF00240_train.msa',
              'PF00595' : 'PF00595_train.msa',
@@ -162,6 +163,14 @@ def create_infoStruct(archtype, datakey):
         adj = create_adj_matrix(nVisNodes,nHidNodes,[])
         adj_l1 = load_l1(datakey)
         adj[:nVisNodes,:nVisNodes] = adj_l1;
+    elif archtype == 'l1123vis':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = 0.
+        infoStruct['hasHidden'] = 0.
+        adj = create_adj_matrix(nVisNodes,nHidNodes,[])
+        adj2 = create_adj_matrix(nVisNodes,nHidNodes,['linear_vis', '2-vis','3-vis'])
+        adj_l1 = load_l1(datakey)
+        adj[:nVisNodes,:nVisNodes] += adj_l1;
     elif archtype == 'linhid':
         nVisNodes = data_nVisNodes[datakey]
         nHidNodes = nVisNodes
