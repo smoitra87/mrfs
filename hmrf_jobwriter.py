@@ -62,7 +62,7 @@ def default_infoStruct():
     infoStruct['inferFunc'] = 'loopy';
     infoStruct['condInferFunc'] = 'loopy';
     infoStruct['nHidStates'] = 4.;
-    infoStruct['usePseudo'] = 1;
+    infoStruct['usePseudo'] = 0;
 
     # Create the options
     options = {}
@@ -85,7 +85,8 @@ maxIter_list = [1000.]
 data_list = ['PF00240', 'PF00595']
 #arch_list = ['linvis', '3dvis', 'l1vis', '12vis', '123vis', 'linhid', \
 #             '3dhid', 'l1hid', 'linvis-linhid', 'linvis-3dhid','l1vis-l1hid' ]
-arch_list = ['3dvis', 'l1vis', '12vis' ]
+#arch_list = ['3dvis', 'l1vis', '12vis' ]
+arch_list = ['l1hid', 'linvis-linhid', '3dhid','12vis' ]
 
 train_dict = {'PF00240' :'PF00240_train.msa',
              'PF00595' : 'PF00595_train.msa',
