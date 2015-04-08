@@ -1,0 +1,2 @@
+jobkey,train-ll,valid-ll,test-ll,train-pll,valid-pll,test-pll,train-imperr,valid-imperr,test-imperr,archtype,condInferFunc,datakey,inferFunc,lambdaEdge,lambdaNode,lbpMaxIter,nHidStates,usePseudo
+try7_0,-132.23032156731296,-137.78745928474706,-136.96251710167135,-129.0397861361884,-138.848965307646,-138.1761659632129,0.5883814471109187,0.6095887630414485,0.6058592325458892,l1123vis,mf,PF00240,mf,1,0.1,1000,2,1
