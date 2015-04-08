@@ -46,6 +46,11 @@ def create_adj_matrix(nVisNodes, nHidNodes, options):
         for idx in range(nVisNodes):
             adj[idx,idx+nVisNodes] = 1
 
+    if 'full' in options:
+        adj[:] = 1
+        for idx in range(nVisNodes):
+            adj[idx,idx] = 0
+
     adj += adj.T
 
     #plot_matrix(adj)
@@ -86,7 +91,8 @@ data_list = ['PF00240', 'PF00595']
 #arch_list = ['linvis', '3dvis', 'l1vis', '12vis', '123vis', 'linhid', \
 #             '3dhid', 'l1hid', 'linvis-linhid', 'linvis-3dhid','l1vis-l1hid' ]
 #arch_list = ['3dvis', 'l1vis', '12vis' ]
-arch_list = ['l1123vis' ]
+#arch_list = ['l1123vis' ]
+arch_list = ['full']
 #arch_list = ['l1hid', 'linvis-linhid', '3dhid','12vis' ]
 
 train_dict = {'PF00240' :'PF00240_train.msa',
@@ -149,6 +155,12 @@ def create_infoStruct(archtype, datakey):
         infoStruct['hasHidden'] = 0.
         adj = create_adj_matrix(nVisNodes,nHidNodes,['linear_vis', '2-vis',\
                                                      '3-vis'])
+    elif archtype == 'full':
+        nVisNodes = data_nVisNodes[datakey]
+        nHidNodes = 0.
+        infoStruct['hasHidden'] = 0.
+        adj = create_adj_matrix(nVisNodes,nHidNodes,['full'])
+        adj[adj>0] = 1.;
     elif archtype == '3dvis':
         nVisNodes = data_nVisNodes[datakey]
         nHidNodes = 0.
