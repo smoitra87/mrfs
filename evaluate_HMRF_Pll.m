@@ -53,15 +53,15 @@ end
 
 
 %% Do conditional inference
-err = 0;
 pll = zeros(nInstances, 1);
+imperr_raw = zeros(nInstances, 1);
 for i = 1:nInstances
     
     if pseudo > 0
         nodeBel = UGM_MRF_InferPseudo(y(i,:), nodePot,edgePot, edgeStruct);
         for j = 1:nVisNodes
             [maxMarg,maxMargIdx] = max(nodeBel(j,:));
-            err = err + (maxMargIdx ~= y(i,j));
+            imperr_raw(i) = imperr_raw(i) + (maxMargIdx ~= y(i,j));
             pll(i) = pll(i) + log(nodeBel(j,y(i,j)));
         end
     else
@@ -70,18 +70,20 @@ for i = 1:nInstances
             [nodeBelC,edgeBelC,logZC] = UGM_Infer_Conditional(nodePot,edgePot,...
                 edgeStruct,clamped,condInferFunc);
             [maxMarg,maxMargIdx] = max(nodeBelC(j,:));
-            err = err + (maxMargIdx ~= y(i,j));
+            imperr_raw(i) = imperr_raw(i) + (maxMargIdx ~= y(i,j));
             pll(i) = pll(i) + log(nodeBelC(j,y(i,j)));
         end
     end
+    imperr_raw(i) = imperr_raw(i) / nVisNodes;
 end
-impErr = err/(nInstances*nVisNodes);
+impErr = mean(imperr_raw);
+pll_raw = pll;
 pll = mean(pll);
 
 
 fprintf('Average PLL : %f\n', pll);
 fprintf('Imputation Error : %f\n', impErr);
-save(outf, 'pll', 'impErr');
+save(outf, 'pll', 'impErr', 'pll_raw', 'imperr_raw');
 end
 
 
