@@ -27,6 +27,7 @@ if __name__ == '__main__':
     headers = ['jobkey', 'train-ll','valid-ll', 'test-ll'] + \
             ['train-pll', 'valid-pll', 'test-pll'] + \
             ['train-imperr', 'valid-imperr', 'test-imperr'] + \
+            ['train-imperr-serr', 'valid-imperr-serr', 'test-imperr-serr'] +\
             headers;
 
     records = []
@@ -52,6 +53,9 @@ if __name__ == '__main__':
                 if t in f:
                     metric['{}-pll'.format(t)] = sio.loadmat(f, squeeze_me=True)['pll']
                     metric['{}-imperr'.format(t)] = sio.loadmat(f, squeeze_me=True)['impErr']
+                    metric['{}-imperr'.format(t)] = sio.loadmat(f, squeeze_me=True)['impErr']
+                    imperr = sio.loadmat(f, squeeze_me=True)['imperr_raw']
+                    metric['{}-imperr-serr'.format(t)] = np.std(imperr) / np.sqrt(len(imperr))
 
 
         record = [metric[h] if h in metric else str(infoStruct[h]) for h in headers]
