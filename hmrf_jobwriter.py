@@ -99,8 +99,8 @@ data_list = [ 'PF11427',
     'PF13833']
 #arch_list = ['linvis', '3dvis', 'l1vis', '12vis', '123vis', 'linhid', \
 #             '3dhid', 'l1hid', 'linvis-linhid', 'linvis-3dhid','l1vis-l1hid' ]
-arch_list = ['l1vis']
-#arch_list = ['l1123vis' ]
+#arch_list = ['l1vis']
+arch_list = ['l1123vis' ]
 #arch_list = ['full']
 #arch_list = ['l1hid', 'linvis-linhid', '3dhid','12vis' ]
 
