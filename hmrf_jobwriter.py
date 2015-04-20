@@ -87,21 +87,39 @@ lambda_list = [ 1.]
 nHidStates_list = [2.]
 maxIter_list = [1000.]
 #data_list = ['PF00240', 'PF00595', 'sim3']
-data_list = ['PF00240', 'PF00595']
+data_list = [ 'PF11427',
+    'PF12569',
+    'PF03459',
+    'PF13693',
+    'PF13710',
+    'PF13899',
+    'PF13920',
+    'PF13459',
+    'PF13927',
+    'PF13833']
 #arch_list = ['linvis', '3dvis', 'l1vis', '12vis', '123vis', 'linhid', \
 #             '3dhid', 'l1hid', 'linvis-linhid', 'linvis-3dhid','l1vis-l1hid' ]
-#arch_list = ['3dvis', 'l1vis', '12vis' ]
+arch_list = ['l1vis']
 #arch_list = ['l1123vis' ]
-arch_list = ['full']
+#arch_list = ['full']
 #arch_list = ['l1hid', 'linvis-linhid', '3dhid','12vis' ]
 
-train_dict = {'PF00240' :'PF00240_train.msa',
-             'PF00595' : 'PF00595_train.msa',
-             'sim3' : 'sim3.train.msa'}
-valid_dict = {'PF00240' :'PF00240_valid.msa',
-             'PF00595' : 'PF00595_valid.msa'}
-test_dict = {'PF00240' :'PF00240_test.msa',
-             'PF00595' : 'PF00595_test.msa'}
+datasets = ['PF00240',
+    'PF00595',
+    'PF11427',
+    'PF12569',
+    'PF03459',
+    'PF13693',
+    'PF13710',
+    'PF13899',
+    'PF13920',
+    'PF13459',
+    'PF13927',
+    'PF13833']
+
+train_dict = dict([(d,d+"_train.msa") for d in datasets])
+valid_dict = dict([(d,d+"_valid.msa") for d in datasets])
+test_dict = dict([(d,d+"_test.msa") for d in datasets])
 
 datamux = {'train' : train_dict,
           'valid' : valid_dict,
@@ -112,15 +130,13 @@ adjf_dict = {
     'PF00595' : '1BE9_adj.npy'
 }
 
-l1_adjf_dict = {
-    'PF00240' : 'results/l1/PF00240.list',
-    'PF00595' : 'results/l1/PF00595.list'
-}
+l1_adjf_dict = dict([(d, 'results/l1/{}.list'.format(d)) for d in datasets])
 
-data_nVisNodes = {
-    'PF00240' : 69,
-    'PF00595' : 81
-}
+data_nVisNodes = {}
+for d in datasets:
+    from commands import getstatusoutput as gout
+    cmd = 'head -1 data/{}_train.msa  | wc -c'.format(d)
+    data_nVisNodes[d] = int(gout(cmd)[1]) - 1
 
 def load_l1(datakey) :
     listf = l1_adjf_dict[datakey]
