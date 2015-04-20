@@ -67,7 +67,7 @@ def default_infoStruct():
     infoStruct['inferFunc'] = 'mf';
     infoStruct['condInferFunc'] = 'mf';
     infoStruct['nHidStates'] = 4.;
-    infoStruct['usePseudo'] = 1;
+    infoStruct['usePseudo'] = 0.;
 
     # Create the options
     options = {}
@@ -84,7 +84,7 @@ def default_infoStruct():
 #lambda_list = [ 1., 0.1]
 lambda_list = [ 1.]
 #nHidStates_list = [2.,4.]
-nHidStates_list = [2.]
+nHidStates_list = [2., 21.]
 maxIter_list = [1000.]
 #data_list = ['PF00240', 'PF00595', 'sim3']
 data_list = [ 'PF11427',
@@ -100,7 +100,8 @@ data_list = [ 'PF11427',
 #arch_list = ['linvis', '3dvis', 'l1vis', '12vis', '123vis', 'linhid', \
 #             '3dhid', 'l1hid', 'linvis-linhid', 'linvis-3dhid','l1vis-l1hid' ]
 #arch_list = ['l1vis']
-arch_list = ['l1123vis' ]
+#arch_list = ['l1123vis' ]
+arch_list = ['linhid' ]
 #arch_list = ['full']
 #arch_list = ['l1hid', 'linvis-linhid', '3dhid','12vis' ]
 
