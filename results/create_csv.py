@@ -43,6 +43,15 @@ if __name__ == '__main__':
 
         metric = {}
         metric['jobkey'] = base_key
+
+        # initialize metrics
+        for t in ('train', 'valid', 'test'):
+            metric['{}-ll'.format(t)] = None
+            metric['{}-pll'.format(t)] = None
+            metric['{}-imperr'.format(t)] = None
+            metric['{}-imperr-serr'.format(t)] = None
+
+
         for f in llf :
             for t in ('train', 'valid', 'test'):
                 if t in f:
@@ -52,7 +61,6 @@ if __name__ == '__main__':
             for t in ('train', 'valid', 'test'):
                 if t in f:
                     metric['{}-pll'.format(t)] = sio.loadmat(f, squeeze_me=True)['pll']
-                    metric['{}-imperr'.format(t)] = sio.loadmat(f, squeeze_me=True)['impErr']
                     metric['{}-imperr'.format(t)] = sio.loadmat(f, squeeze_me=True)['impErr']
                     imperr = sio.loadmat(f, squeeze_me=True)['imperr_raw']
                     metric['{}-imperr-serr'.format(t)] = np.std(imperr) / np.sqrt(len(imperr))
