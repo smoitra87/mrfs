@@ -67,7 +67,7 @@ def default_infoStruct():
     infoStruct['inferFunc'] = 'loopy';
     infoStruct['condInferFunc'] = 'loopy';
     infoStruct['nHidStates'] = 4.;
-    infoStruct['usePseudo'] = 0.;
+    infoStruct['usePseudo'] = 1.;
 
     # Create the options
     options = {}
@@ -84,7 +84,8 @@ def default_infoStruct():
 #lambda_list = [ 1., 0.1]
 lambda_list = [ 1.]
 #nHidStates_list = [2.,4.]
-nHidStates_list = [2., 21.]
+#nHidStates_list = [2., 21.]
+nHidStates_list = [2.]
 maxIter_list = [1000.]
 #data_list = ['PF00240', 'PF00595', 'sim3']
 data_list = [ 'PF11427',
@@ -100,8 +101,8 @@ data_list = [ 'PF11427',
 #arch_list = ['linvis', '3dvis', 'l1vis', '12vis', '123vis', 'linhid', \
 #             '3dhid', 'l1hid', 'linvis-linhid', 'linvis-3dhid','l1vis-l1hid' ]
 #arch_list = ['l1vis']
-#arch_list = ['l1123vis' ]
-arch_list = ['linhid' ]
+arch_list = ['l1123vis' ]
+#arch_list = ['linhid' ]
 #arch_list = ['full']
 #arch_list = ['l1hid', 'linvis-linhid', '3dhid','12vis' ]
 
@@ -278,6 +279,7 @@ if __name__ == '__main__':
     parser.add_argument("--param", action='store_true', help="Learn params flag")
     parser.add_argument("--eval_pll", action='store_true', help="Evaluate Pll")
     parser.add_argument("--eval_ll", action='store_true', help="Evaluate Test ll")
+    parser.add_argument("--eval_blosum90", action='store_true', help="Evaluate Bolsum90 scores")
     parser.add_argument("--extract_rep", action='store_true', help="Extract representations")
 
     args = parser.parse_args()
@@ -322,7 +324,7 @@ if __name__ == '__main__':
             outstr = "('%s','%s','%s')"%(infof, msaf, outf)
             print >>sys.stdout, outstr
 
-        if args.eval_pll or args.eval_ll:
+        if args.eval_pll or args.eval_ll or args.eval_blosum90:
             paramf =  "{}_{}_params.mat".format(args.prefix, idx)
             paramf = os.path.join(args.rootdir,args.resultsdir, paramf)
 
@@ -333,12 +335,22 @@ if __name__ == '__main__':
 
                 if args.eval_pll:
                     outf =  "{}_{}_{}_pll.mat".format(args.prefix, idx, dtype)
-                else:
+                elif args.eval_ll:
                     outf =  "{}_{}_{}_ll.mat".format(args.prefix, idx, dtype)
+                elif args.eval_blosum90:
+                    outf =  "{}_{}_{}_blosum90.mat".format(args.prefix, idx, dtype)
+                else:
+                    raise ValueError('Unknown option')
 
                 outf = os.path.join(args.rootdir,args.resultsdir, outf)
 
-                outstr = "('%s','%s','%s')"%(paramf, msaf, outf)
+                if args.eval_ll or args.eval_pll:
+                    outstr = "('%s','%s','%s')"%(paramf, msaf, outf)
+                elif args.eval_blosum90:
+                    outstr = "('%s','%s','%s','blosum90')"%(paramf, msaf, outf)
+                else:
+                    raise ValueError('Unknown option')
+
                 print >>sys.stdout, outstr
 
         if args.extract_rep:
