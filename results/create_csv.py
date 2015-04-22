@@ -15,6 +15,7 @@ if __name__ == '__main__':
     files = glob.glob(args.globstr)
 
     pllfs = [f for f in files if '_pll' in f ]
+    blosumfs = [f for f in files if '_blosum' in f ]
     llfs = [f for f in files if '_ll' in f ]
     paramfs = [f for f in files if '_params' in f ]
 
@@ -27,7 +28,9 @@ if __name__ == '__main__':
     headers = ['jobkey', 'train-ll','valid-ll', 'test-ll'] + \
             ['train-pll', 'valid-pll', 'test-pll'] + \
             ['train-imperr', 'valid-imperr', 'test-imperr'] + \
+            ['train-bl90', 'valid-bl90', 'test-bl90'] + \
             ['train-imperr-serr', 'valid-imperr-serr', 'test-imperr-serr'] +\
+            ['train-bl90-serr', 'valid-bl90-serr', 'test-bl90-serr'] +\
             headers;
 
     records = []
@@ -37,6 +40,7 @@ if __name__ == '__main__':
 
         llf = [f for f in llfs if base_key in f]
         pllf = [f for f in pllfs if base_key in f]
+        blosumf = [f for f in blosumfs if base_key in f]
 
         mat = sio.loadmat(paramf, squeeze_me=True)
         infoStruct = mat['infoStruct']
@@ -49,7 +53,9 @@ if __name__ == '__main__':
             metric['{}-ll'.format(t)] = None
             metric['{}-pll'.format(t)] = None
             metric['{}-imperr'.format(t)] = None
+            metric['{}-bl90'.format(t)] = None
             metric['{}-imperr-serr'.format(t)] = None
+            metric['{}-bl90-serr'.format(t)] = None
 
 
         for f in llf :
@@ -65,6 +71,12 @@ if __name__ == '__main__':
                     imperr = sio.loadmat(f, squeeze_me=True)['imperr_raw']
                     metric['{}-imperr-serr'.format(t)] = np.std(imperr) / np.sqrt(len(imperr))
 
+        for f in blosumf :
+            for t in ('train', 'valid', 'test'):
+                if t in f:
+                    metric['{}-bl90'.format(t)] = sio.loadmat(f, squeeze_me=True)['impErr']
+                    bl90 = sio.loadmat(f, squeeze_me=True)['imperr_raw']
+                    metric['{}-bl90-serr'.format(t)] = np.std(bl90) / np.sqrt(len(imperr))
 
         record = [metric[h] if h in metric else str(infoStruct[h]) for h in headers]
         records.append(record)
@@ -79,11 +91,5 @@ if __name__ == '__main__':
         writer.writerow(headers)
         for record in records:
             writer.writerow(record)
-
-
-
-
-
-
 
 
