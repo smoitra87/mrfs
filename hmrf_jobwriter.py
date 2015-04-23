@@ -88,17 +88,17 @@ lambda_list = [ 1.]
 nHidStates_list = [2.]
 maxIter_list = [1000.]
 #data_list = ['PF00240', 'PF00595', 'sim3']
-#data_list = ['PF00240', 'PF00595']
-data_list = [ 'PF11427',
-    'PF12569',
-    'PF03459',
-    'PF13693',
-    'PF13710',
-    'PF13899',
-    'PF13920',
-    'PF13459',
-    'PF13927',
-    'PF13833']
+data_list = ['PF00240', 'PF00595']
+#data_list = [ 'PF11427',
+#    'PF12569',
+#    'PF03459',
+#    'PF13693',
+#    'PF13710',
+#    'PF13899',
+#    'PF13920',
+#    'PF13459',
+#    'PF13927',
+#    'PF13833']
 #arch_list = ['linvis', '3dvis', 'l1vis', '12vis', '123vis', 'linhid', \
 #             '3dhid', 'l1hid', 'linvis-linhid', 'linvis-3dhid','l1vis-l1hid' ]
 #arch_list = ['l1vis']
