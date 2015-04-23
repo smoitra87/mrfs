@@ -277,10 +277,14 @@ if __name__ == '__main__':
     parser.add_argument("--datadir", type=str, help="Directory for datafile")
     parser.add_argument("--rootdir", type=str, help="Directory on workhorse")
     parser.add_argument("--resultsdir", type=str, help="Directory on workhorse")
+    parser.add_argument("--multmode", type=str, help="Mode for multicol imputations")
+    parser.add_argument("--multicols", type=str, nargs='+', help="Number of columns to run multcols")
     parser.add_argument("--param", action='store_true', help="Learn params flag")
     parser.add_argument("--eval_pll", action='store_true', help="Evaluate Pll")
     parser.add_argument("--eval_ll", action='store_true', help="Evaluate Test ll")
     parser.add_argument("--eval_blosum90", action='store_true', help="Evaluate Bolsum90 scores")
+    parser.add_argument("--eval_multicol", action='store_true', help="Evaluate Bolsum90 scores")
+    parser.add_argument("--eval_multicols_blosum90", action='store_true', help="Evaluate Bolsum90 scores")
     parser.add_argument("--extract_rep", action='store_true', help="Extract representations")
 
     args = parser.parse_args()
@@ -353,6 +357,43 @@ if __name__ == '__main__':
                     raise ValueError('Unknown option')
 
                 print >>sys.stdout, outstr
+
+        if args.eval_multicol or args.eval_multicol_blosum90:
+            paramf =  "{}_{}_params.mat".format(args.prefix, idx)
+            paramf = os.path.join(args.rootdir,args.resultsdir, paramf)
+
+            multmode = args.multmode
+
+            for dtype in datamux.keys():
+                data_dict = datamux[dtype]
+                msaf = data_dict[datakey]
+                msaf = os.path.join(args.rootdir,args.datadir, msaf)
+
+                for multicol in args.multicols:
+                    base_key = "{}{}".format(multmode, multicol)
+                    multicol_file = os.path.join(args.rootdir,args.datadir, \
+                        'multicols',datakey,'{}_{}.mat'.format(multmode, multicol))
+
+                    if args.eval_multicol:
+                        outf =  "{}_{}_{}_{}multimp.mat".format(\
+                            args.prefix, idx, dtype,base_key)
+                    elif atgs.eval_multicol_blosum90:
+                        outf =  "{}_{}_{}_{}multbl90.mat".format(\
+                            args.prefix, idx, dtype,base_key)
+                    else:
+                        raise ValueError('Unknown option')
+
+                    outf = os.path.join(args.rootdir,args.resultsdir, outf)
+
+                    if args.eval_multicol:
+                        outstr = "('%s','%s','%s','%s','mf')"%(paramf, msaf, outf, multicol_file)
+                    elif args.eval_multicol_blosum90:
+                        outstr = "('%s','%s','%s','%s','mf','blosum90')"%(paramf, msaf, outf, multicol_file)
+                    else:
+                        raise ValueError('Unknown option')
+
+                    print >>sys.stdout, outstr
+
 
         if args.extract_rep:
             infoStruct = create_infoStruct(archtype, datakey)
