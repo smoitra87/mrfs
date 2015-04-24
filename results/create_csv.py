@@ -22,6 +22,10 @@ if __name__ == '__main__':
     for ncol in (2,3,5,10):
         randfs_dict[ncol] = [f for f in files if '_rand{}multimp'.format(ncol) in f]
         randfsbl90_dict[ncol] = [f for f in files if '_rand{}multbl90'.format(ncol) in f]
+    blockfs_dict, blockfsbl90_dict = {}, {}
+    for ncol in (2,3,5,10):
+        blockfs_dict[ncol] = [f for f in files if '_block{}multimp'.format(ncol) in f]
+        blockfsbl90_dict[ncol] = [f for f in files if '_block{}multbl90'.format(ncol) in f]
 
     mat = sio.loadmat(paramfs[0], squeeze_me=True)
     infoStruct = mat['infoStruct']
@@ -41,6 +45,9 @@ if __name__ == '__main__':
     for ncol in (2,3,5,10):
         for t in ('train', 'valid','test'):
             headers2.append('{}-rand{}bl90'.format(t,ncol))
+    for ncol in (2,3,5,10):
+        for t in ('train', 'valid','test'):
+            headers2.append('{}-block{}'.format(t,ncol))
     headers = headers2 + headers;
 
     records = []
@@ -56,6 +63,10 @@ if __name__ == '__main__':
         for ncol in (2,3,5,10):
             randf_dict[ncol] = [f for f in randfs_dict[ncol] if base_key in f]
             randfbl90_dict[ncol] = [f for f in randfsbl90_dict[ncol] if base_key in f]
+        blockf_dict, blockfbl90_dict = {}, {}
+        for ncol in (2,3,5,10):
+            blockf_dict[ncol] = [f for f in blockfs_dict[ncol] if base_key in f]
+            blockfbl90_dict[ncol] = [f for f in blockfsbl90_dict[ncol] if base_key in f]
         mat = sio.loadmat(paramf, squeeze_me=True)
         infoStruct = mat['infoStruct']
 
@@ -86,6 +97,20 @@ if __name__ == '__main__':
                     if t in f:
                         metric['{}-rand{}bl90'.format(t,ncol)] = sio.loadmat(f, squeeze_me=True)['impErr']
 
+        for ncol in (2,3,5,10):
+            for t in ('train', 'valid','test'):
+                metric['{}-block{}'.format(t,ncol)] = None
+                metric['{}-block{}bl90'.format(t,ncol)] = None
+
+        for ncol in (2,3,5,10):
+            for f in blockf_dict[ncol] :
+                for t in ('train', 'valid','test'):
+                    if t in f:
+                        metric['{}-block{}'.format(t,ncol)] = sio.loadmat(f, squeeze_me=True)['impErr']
+            for f in blockfbl90_dict[ncol] :
+                for t in ('train', 'valid','test'):
+                    if t in f:
+                        metric['{}-block{}bl90'.format(t,ncol)] = sio.loadmat(f, squeeze_me=True)['impErr']
         for f in llf :
             for t in ('train', 'valid', 'test'):
                 if t in f:
