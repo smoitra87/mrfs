@@ -4,6 +4,7 @@ import numpy as np
 from Bio import SeqIO
 from commands import getstatusoutput
 import csv
+import pickle
 
 import urllib
 
@@ -22,6 +23,7 @@ if __name__ == '__main__':
          help="Gap open cost for clustalw2")
     parser.add_argument("--exposure_cutoff", type=float, default=2.5,\
          help="Cutoff for surface exposure")
+    parser.add_argument("--force", action="store_true", help="Run even if file exists")
     args = parser.parse_args()
 
 
@@ -42,7 +44,7 @@ if __name__ == '__main__':
     pfamidx = next(idx for (idx,p) in enumerate(col2list['pfamid']) if p == args.pfamid)
 
     pdb_file =os.path.join(args.pfamid, col2list['pdbid'][pfamidx] + ".pdb") 
-    if not os.path.exists(pdb_file):
+    if not os.path.exists(pdb_file) or args.force:
         pdb_data = fetch_pdb(col2list['pdbid'][pfamidx]) 
         with open(pdb_file, "w") as fout:
             fout.write(pdb_data)
@@ -52,7 +54,7 @@ if __name__ == '__main__':
     # Fetch the consensus sequence
     # Check of consensus already exists
     consensus_file = os.path.join(args.pfamid, 'baker.fasta')
-    if not os.path.exists(consensus_file):
+    if not os.path.exists(consensus_file) or args.force:
         from get_consensus import fetch_consensus
         fetch_consensus(args.pfamid) 
     else: 
@@ -61,7 +63,7 @@ if __name__ == '__main__':
     # Get the pdb sequence for the chain
     chain = col2list['chain'][pfamidx]
     pdb_fasta_file = os.path.join(args.pfamid, "pdb.fasta")
-    if not os.path.exists(pdb_fasta_file):
+    if not os.path.exists(pdb_fasta_file) or args.force:
         cmd = "python pdbtools/pdb_seq.py {0} -c {1}".format(pdb_file, chain)
         out = getstatusoutput(cmd)
         if out[0] > 0:
@@ -116,28 +118,80 @@ if __name__ == '__main__':
     baker_map = [idx for idx,e in enumerate(baker_seq) if e != '-'] 
     pdb_map = [idx for idx,e in enumerate(pdb_seq) if e != '-'] 
     
-    baker_idxs = [i for (i,j) in enumerate(baker_map) if j in overlaps]
-    pdb_idxs = [i for (i,j) in enumerate(pdb_map) if j in overlaps]
+    baker_idxs = [i+1 for (i,j) in enumerate(baker_map) if j in overlaps]
+    pdb_idxs = [i+1 for (i,j) in enumerate(pdb_map) if j in overlaps]
 
     # Launch pymol and make a list of calculations
-    import pymol
-    from pymol import cmd
-    pymol.finish_launching()
-    time.sleep(1)
-    cmd.load(pdb_file)
-    from surface_residues import findAtomExposure
-    atoms = findAtomExposure('2ID5 and chain A')
-    cmd.quit()
+    functional_file = os.path.join(args.pfamid, "functional.pkl")
+    if  not os.path.exists(functional_file) or args.force:
+        import pymol
+        from pymol import cmd
+        pymol.finish_launching()
+        time.sleep(1)
+        cmd.load(pdb_file)
+        from surface_residues import findAtomExposure
+        primary_chain = col2list['chain'][pfamidx].strip()
+        pdbid = col2list['pdbid'][pfamidx]
 
-    time.sleep(1);
-    from collections import defaultdict
-    atomdict = defaultdict(float)
-    for record in atoms:
-        name, chain, residx, exposure = record
-        atomdict[residx] = max(atomdict[residx], exposure)
+        atoms = findAtomExposure('{} and chain {}'.format(pdbid, primary_chain))
+        from collections import defaultdict
+        atomdict = defaultdict(float)
+        for record in atoms:
+            name, chain, residx, exposure = record
+            atomdict[residx] = max(atomdict[residx], exposure)
 
-    atomdict = dict(atomdict)
-    core_res = [r for (r,exp) in atomdict.items() if exp < args.exposure_cutoff]
-    surface_res = [r for (r,exp) in atomdict.items() if exp > args.exposure_cutoff]
-    print core_res
-    print surface_res
+        atomdict = dict(atomdict)
+        core_res = [r for (r,exp) in atomdict.items() if exp < args.exposure_cutoff]
+        surface_res = [r for (r,exp) in atomdict.items() if exp > args.exposure_cutoff]
+        #print core_res
+        #print surface_res
+    
+        # Find binding interface residues
+        binding_chains = col2list['bindingchains'][pfamidx]
+        binding_chains = [l for l in binding_chains.strip().split(";") if len(l) > 0]
+       
+        binding_interface = set() 
+        from interface_residues import interfaceResidues
+        for bchain in binding_chains:
+            interface = interfaceResidues(pdbid,cA = 'c. '+primary_chain, \
+                cB = 'c. '+bchain)
+            binding_interface.update([int(t[1]) for t in interface if t[0] == 'chA'])
+
+        #print binding_interface
+
+        # Make a list of all the ligand residues
+        ligands = col2list['ligandnames'][pfamidx]
+        ligands = [l for l in ligands.strip().split(";") if len(l) > 0]
+
+        # Find all the ligand nearby residues
+        from ligand import ligandNeighbors
+        ligand_contacts = set()
+        for ligand in ligands:
+            nbrs = ligandNeighbors(pdbid, primary_chain, ligand)
+            ligand_contacts.update([int(t[1]) for t in nbrs])
+
+        #print ligand_contacts
+
+        cmd.quit()
+        time.sleep(1);
+    
+        def intersect_helper(l1, l2):
+            return sorted(list(set(l1).intersection(l2)))
+
+        coldict = {}
+        coldict['surface'] = intersect_helper(pdb_idxs, surface_res)
+        coldict['core'] = intersect_helper(pdb_idxs, core_res)
+        coldict['interface'] = intersect_helper(pdb_idxs, binding_interface)
+        coldict['ligands'] = intersect_helper(pdb_idxs, ligand_contacts)
+        
+        for k,val in coldict.items():
+            coldict["msa-"+k] = [t[1] for t in zip(pdb_idxs, baker_idxs) if \
+                t[0] in coldict[k] ] 
+    
+        print coldict
+
+        with open(functional_file, 'wb')  as fout:
+            pickle.dump(coldict, fout)
+    else:
+        print "Functional file exists: {}".format(functional_file)
+
