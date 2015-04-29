@@ -1,4 +1,5 @@
 import os, sys
+import time
 import numpy as np
 from Bio import SeqIO
 from commands import getstatusoutput
@@ -19,6 +20,8 @@ if __name__ == '__main__':
     parser.add_argument("--pfamid", type=str, help="PFam id run")
     parser.add_argument("--gap_open_cost", type=int, default=30,\
          help="Gap open cost for clustalw2")
+    parser.add_argument("--exposure_cutoff", type=float, default=2.5,\
+         help="Cutoff for surface exposure")
     args = parser.parse_args()
 
 
@@ -116,3 +119,25 @@ if __name__ == '__main__':
     baker_idxs = [i for (i,j) in enumerate(baker_map) if j in overlaps]
     pdb_idxs = [i for (i,j) in enumerate(pdb_map) if j in overlaps]
 
+    # Launch pymol and make a list of calculations
+    import pymol
+    from pymol import cmd
+    pymol.finish_launching()
+    time.sleep(1)
+    cmd.load(pdb_file)
+    from surface_residues import findAtomExposure
+    atoms = findAtomExposure('2ID5 and chain A')
+    cmd.quit()
+
+    time.sleep(1);
+    from collections import defaultdict
+    atomdict = defaultdict(float)
+    for record in atoms:
+        name, chain, residx, exposure = record
+        atomdict[residx] = max(atomdict[residx], exposure)
+
+    atomdict = dict(atomdict)
+    core_res = [r for (r,exp) in atomdict.items() if exp < args.exposure_cutoff]
+    surface_res = [r for (r,exp) in atomdict.items() if exp > args.exposure_cutoff]
+    print core_res
+    print surface_res
