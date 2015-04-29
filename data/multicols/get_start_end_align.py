@@ -1,5 +1,7 @@
 import os, sys
 from Bio import SeqIO
+import pickle
+
 
 def return_start_end(seq):
     """ Returns the start and end indices of amino acids  """    
