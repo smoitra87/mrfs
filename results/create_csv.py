@@ -26,6 +26,18 @@ if __name__ == '__main__':
     for ncol in (2,3,5,10):
         blockfs_dict[ncol] = [f for f in files if '_block{}multimp'.format(ncol) in f]
         blockfsbl90_dict[ncol] = [f for f in files if '_block{}multbl90'.format(ncol) in f]
+    corefs_dict, corefsbl90_dict = {}, {}
+    for ncol in (1,2,3,5,10):
+        corefs_dict[ncol] = [f for f in files if '_core{}multimp'.format(ncol) in f]
+        corefsbl90_dict[ncol] = [f for f in files if '_core{}multbl90'.format(ncol) in f]
+    surfacefs_dict, surfacefsbl90_dict = {}, {}
+    for ncol in (1,2,3,5,10):
+        surfacefs_dict[ncol] = [f for f in files if '_surface{}multimp'.format(ncol) in f]
+        surfacefsbl90_dict[ncol] = [f for f in files if '_surface{}multbl90'.format(ncol) in f]
+    boundfs_dict, boundfsbl90_dict = {}, {}
+    for ncol in (1,2,3,5,10):
+        boundfs_dict[ncol] = [f for f in files if '_bound{}multimp'.format(ncol) in f]
+        boundfsbl90_dict[ncol] = [f for f in files if '_bound{}multbl90'.format(ncol) in f]
 
     mat = sio.loadmat(paramfs[0], squeeze_me=True)
     infoStruct = mat['infoStruct']
@@ -48,6 +60,15 @@ if __name__ == '__main__':
     for ncol in (2,3,5,10):
         for t in ('train', 'valid','test'):
             headers2.append('{}-block{}'.format(t,ncol))
+    for ncol in (1,2,3,5,10):
+        for t in ('train', 'valid','test'):
+            headers2.append('{}-core{}'.format(t,ncol))
+    for ncol in (1,2,3,5,10):
+        for t in ('train', 'valid','test'):
+            headers2.append('{}-surface{}'.format(t,ncol))
+    for ncol in (1,2,3,5,10):
+        for t in ('train', 'valid','test'):
+            headers2.append('{}-bound{}'.format(t,ncol))
     headers = headers2 + headers;
 
     records = []
@@ -67,6 +88,18 @@ if __name__ == '__main__':
         for ncol in (2,3,5,10):
             blockf_dict[ncol] = [f for f in blockfs_dict[ncol] if base_key in f]
             blockfbl90_dict[ncol] = [f for f in blockfsbl90_dict[ncol] if base_key in f]
+        coref_dict, corefbl90_dict = {}, {}
+        for ncol in (1,2,3,5,10):
+            coref_dict[ncol] = [f for f in corefs_dict[ncol] if base_key in f]
+            corefbl90_dict[ncol] = [f for f in corefsbl90_dict[ncol] if base_key in f]
+        surfacef_dict, surfacefbl90_dict = {}, {}
+        for ncol in (1,2,3,5,10):
+            surfacef_dict[ncol] = [f for f in surfacefs_dict[ncol] if base_key in f]
+            surfacefbl90_dict[ncol] = [f for f in surfacefsbl90_dict[ncol] if base_key in f]
+        boundf_dict, boundfbl90_dict = {}, {}
+        for ncol in (1,2,3,5,10):
+            boundf_dict[ncol] = [f for f in boundfs_dict[ncol] if base_key in f]
+            boundfbl90_dict[ncol] = [f for f in boundfsbl90_dict[ncol] if base_key in f]
         mat = sio.loadmat(paramf, squeeze_me=True)
         infoStruct = mat['infoStruct']
 
@@ -111,6 +144,48 @@ if __name__ == '__main__':
                 for t in ('train', 'valid','test'):
                     if t in f:
                         metric['{}-block{}bl90'.format(t,ncol)] = sio.loadmat(f, squeeze_me=True)['impErr']
+        for ncol in (1, 2,3,5,10):
+            for t in ('train', 'valid','test'):
+                metric['{}-core{}'.format(t,ncol)] = None
+                metric['{}-core{}bl90'.format(t,ncol)] = None
+
+        for ncol in (1, 2,3,5,10):
+            for f in coref_dict[ncol] :
+                for t in ('train', 'valid','test'):
+                    if t in f:
+                        metric['{}-core{}'.format(t,ncol)] = sio.loadmat(f, squeeze_me=True)['impErr']
+            for f in corefbl90_dict[ncol] :
+                for t in ('train', 'valid','test'):
+                    if t in f:
+                        metric['{}-core{}bl90'.format(t,ncol)] = sio.loadmat(f, squeeze_me=True)['impErr']
+        for ncol in (1, 2,3,5,10):
+            for t in ('train', 'valid','test'):
+                metric['{}-surface{}'.format(t,ncol)] = None
+                metric['{}-surface{}bl90'.format(t,ncol)] = None
+
+        for ncol in (1, 2,3,5,10):
+            for f in surfacef_dict[ncol] :
+                for t in ('train', 'valid','test'):
+                    if t in f:
+                        metric['{}-surface{}'.format(t,ncol)] = sio.loadmat(f, squeeze_me=True)['impErr']
+            for f in surfacefbl90_dict[ncol] :
+                for t in ('train', 'valid','test'):
+                    if t in f:
+                        metric['{}-surface{}bl90'.format(t,ncol)] = sio.loadmat(f, squeeze_me=True)['impErr']
+        for ncol in (1, 2,3,5,10):
+            for t in ('train', 'valid','test'):
+                metric['{}-bound{}'.format(t,ncol)] = None
+                metric['{}-bound{}bl90'.format(t,ncol)] = None
+
+        for ncol in (1, 2,3,5,10):
+            for f in boundf_dict[ncol] :
+                for t in ('train', 'valid','test'):
+                    if t in f:
+                        metric['{}-bound{}'.format(t,ncol)] = sio.loadmat(f, squeeze_me=True)['impErr']
+            for f in boundfbl90_dict[ncol] :
+                for t in ('train', 'valid','test'):
+                    if t in f:
+                        metric['{}-bound{}bl90'.format(t,ncol)] = sio.loadmat(f, squeeze_me=True)['impErr']
         for f in llf :
             for t in ('train', 'valid', 'test'):
                 if t in f:
